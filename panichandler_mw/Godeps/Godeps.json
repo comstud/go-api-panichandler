@@ -1,0 +1,19 @@
+{
+	"ImportPath": "github.com/tilteng/go-api-panichandler/panichandler_mw",
+	"GoVersion": "go1.7",
+	"GodepVersion": "v74",
+	"Packages": [
+		"./..."
+	],
+	"Deps": [
+		{
+			"ImportPath": "github.com/gorilla/mux",
+			"Comment": "v1.1-27-g757bef9",
+			"Rev": "757bef944d0f21880861c2dd9c871ca543023cba"
+		},
+		{
+			"ImportPath": "github.com/tilteng/go-api-router/api_router",
+			"Rev": "7f83c88ce7bf095551b3cdb5983f77aee969126b"
+		}
+	]
+}
