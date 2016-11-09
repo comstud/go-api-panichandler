@@ -22,12 +22,12 @@ func TestPanicString(t *testing.T) {
 	var got_rctx *api_router.RequestContext
 	var got_val interface{}
 
-	handler := func(ctx context.Context, val interface{}) {
+	handler := PanicHandlerFn(func(ctx context.Context, val interface{}) {
 		got_rctx = api_router.RequestContextFromContext(ctx)
 		got_val = val
-	}
+	})
 
-	mw := NewMiddleware(PanicHandler(handler))
+	mw := NewMiddleware(handler)
 	wrapper := mw.NewWrapper().Wrap(func(ctx context.Context) {
 		panic(error_string)
 	})
@@ -54,12 +54,12 @@ func TestPanicObject(t *testing.T) {
 	var got_rctx *api_router.RequestContext
 	var got_val interface{}
 
-	handler := func(ctx context.Context, val interface{}) {
+	handler := PanicHandlerFn(func(ctx context.Context, val interface{}) {
 		got_rctx = api_router.RequestContextFromContext(ctx)
 		got_val = val
-	}
+	})
 
-	mw := NewMiddleware(PanicHandler(handler))
+	mw := NewMiddleware(handler)
 	wrapper := mw.NewWrapper().Wrap(func(ctx context.Context) {
 		panic(error_obj)
 	})
