@@ -1,8 +1,10 @@
 package api_router
 
 import (
+	"bytes"
 	"context"
 	"io"
+	"io/ioutil"
 	"net/http"
 )
 
@@ -16,7 +18,9 @@ func (self *contextKey) String() string {
 	return "go-api-controller context value " + self.name
 }
 
+// Satisfies context.Context interface
 type RequestContext struct {
+	context.Context
 	request             *http.Request
 	writer              ResponseWriter
 	currentRoute        *Route
@@ -24,8 +28,25 @@ type RequestContext struct {
 	statusHeaderWritten bool
 }
 
+func (self *RequestContext) Value(key interface{}) interface{} {
+	if key == requestContextCtxKey {
+		return self
+	}
+	return self.Context.Value(key)
+}
+
 func (self *RequestContext) Body() io.ReadCloser {
 	return self.request.Body
+}
+
+func (self *RequestContext) BodyCopy() (buf []byte, err error) {
+	body := self.request.Body
+	buf, err = ioutil.ReadAll(body)
+	if err == nil {
+		defer body.Close()
+		self.request.Body = ioutil.NopCloser(bytes.NewBuffer(buf))
+	}
+	return
 }
 
 func (self *RequestContext) SetBody(body io.ReadCloser) {
@@ -34,10 +55,6 @@ func (self *RequestContext) SetBody(body io.ReadCloser) {
 
 func (self *RequestContext) HTTPRequest() *http.Request {
 	return self.request
-}
-
-func (self *RequestContext) Context() context.Context {
-	return self.request.Context()
 }
 
 func (self *RequestContext) WithContext(ctx context.Context) *RequestContext {
@@ -84,21 +101,21 @@ func (self *RequestContext) WriteResponseString(data string) (err error) {
 	return
 }
 
-func NewContextForRequest(w ResponseWriter, r *http.Request, cur_route *Route) context.Context {
+func NewContextForRequest(w ResponseWriter, r *http.Request, cur_route *Route) *RequestContext {
 	vars := cur_route.RouteVars(r)
 	if vars == nil {
 		vars = make(map[string]string)
 	}
 
 	req_ctx := &RequestContext{
+		Context:      r.Context(),
 		writer:       w,
 		currentRoute: cur_route,
 		routeVars:    vars,
 	}
 
-	ctx := context.WithValue(r.Context(), requestContextCtxKey, req_ctx)
-	req_ctx.request = r.WithContext(ctx)
-	return ctx
+	req_ctx.request = r.WithContext(req_ctx)
+	return req_ctx
 }
 
 func RequestContextFromContext(ctx context.Context) *RequestContext {
