@@ -32,7 +32,7 @@ func TestPanicString(t *testing.T) {
 		panic(error_string)
 	})
 
-	wrapper(rctx.Context())
+	wrapper(rctx)
 
 	if got_rctx != rctx {
 		t.Errorf("panic handler not same: %+v", got_rctx)
@@ -64,7 +64,7 @@ func TestPanicObject(t *testing.T) {
 		panic(error_obj)
 	})
 
-	wrapper(rctx.Context())
+	wrapper(rctx)
 
 	if got_rctx != rctx {
 		t.Errorf("panic handler not same: %+v", got_rctx)
